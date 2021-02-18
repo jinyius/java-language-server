@@ -1,6 +1,6 @@
 package org.javacs;
 
-import com.google.devtools.build.lib.analysis.AnalysisProtos;
+import com.google.devtools.build.lib.analysis.AnalysisProtosV2;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -378,9 +378,9 @@ class InferConfig {
 
     private Set<String> readActionGraph(Path output, String filterArgument) {
         try {
-            var container = AnalysisProtos.ActionGraphContainer.parseFrom(Files.newInputStream(output));
+            var container = AnalysisProtosV2.ActionGraphContainer.parseFrom(Files.newInputStream(output));
             var argumentPaths = new HashSet<String>();
-            var outputIds = new HashSet<String>();
+            var outputIds = new HashSet<Integer>();
             for (var action : container.getActionsList()) {
                 var isFilterArgument = false;
                 for (var argument : action.getArgumentsList()) {
@@ -398,6 +398,7 @@ class InferConfig {
             }
             var artifactPaths = new HashSet<String>();
             for (var artifact : container.getArtifactsList()) {
+                // TODO: use the new v2 PathFragment to replace getExecPath
                 if (!argumentPaths.contains(artifact.getExecPath())) {
                     // artifact was not specified by --filterArgument
                     continue;
